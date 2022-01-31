@@ -1,3 +1,5 @@
+import "regenerator-runtime/runtime.js";
+
 import { changeDefaults, defaults, getDefaults } from "./defaults.js";
 import { checkSanitizeDeprecation, escape, merge } from "./helpers.js";
 

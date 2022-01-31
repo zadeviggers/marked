@@ -1,3 +1,5 @@
+import "regenerator-runtime/runtime.js";
+
 import { cleanUrl, escape } from "./helpers.js";
 
 import { defaults } from "./defaults.js";

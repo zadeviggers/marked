@@ -1,9 +1,10 @@
+import "regenerator-runtime/runtime.js";
+
 import { Renderer } from "./Renderer.js";
 import { Slugger } from "./Slugger.js";
 import { TextRenderer } from "./TextRenderer.js";
 import { defaults } from "./defaults.js";
 import { unescape } from "./helpers.js";
-
 /**
  * Parsing & Compiling
  */

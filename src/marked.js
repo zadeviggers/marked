@@ -1,34 +1,30 @@
-import { Lexer } from './Lexer.js';
-import { Parser } from './Parser.js';
-import { Tokenizer } from './Tokenizer.js';
-import { Renderer } from './Renderer.js';
-import { TextRenderer } from './TextRenderer.js';
-import { Slugger } from './Slugger.js';
-import {
-  merge,
-  checkSanitizeDeprecation,
-  escape
-} from './helpers.js';
-import {
-  getDefaults,
-  changeDefaults,
-  defaults
-} from './defaults.js';
+import { changeDefaults, defaults, getDefaults } from "./defaults.js";
+import { checkSanitizeDeprecation, escape, merge } from "./helpers.js";
+
+import { Lexer } from "./Lexer.js";
+import { Parser } from "./Parser.js";
+import { Renderer } from "./Renderer.js";
+import { Slugger } from "./Slugger.js";
+import { TextRenderer } from "./TextRenderer.js";
+import { Tokenizer } from "./Tokenizer.js";
 
 /**
  * Marked
  */
-export function marked(src, opt, callback) {
+export async function marked(src, opt, callback) {
   // throw error in case of non string input
-  if (typeof src === 'undefined' || src === null) {
-    throw new Error('marked(): input parameter is undefined or null');
+  if (typeof src === "undefined" || src === null) {
+    throw new Error("marked(): input parameter is undefined or null");
   }
-  if (typeof src !== 'string') {
-    throw new Error('marked(): input parameter is of type '
-      + Object.prototype.toString.call(src) + ', string expected');
+  if (typeof src !== "string") {
+    throw new Error(
+      "marked(): input parameter is of type " +
+        Object.prototype.toString.call(src) +
+        ", string expected"
+    );
   }
 
-  if (typeof opt === 'function') {
+  if (typeof opt === "function") {
     callback = opt;
     opt = null;
   }
@@ -46,7 +42,7 @@ export function marked(src, opt, callback) {
       return callback(e);
     }
 
-    const done = function(err) {
+    const done = function (err) {
       let out;
 
       if (!err) {
@@ -62,9 +58,7 @@ export function marked(src, opt, callback) {
 
       opt.highlight = highlight;
 
-      return err
-        ? callback(err)
-        : callback(null, out);
+      return err ? callback(err) : callback(null, out);
     };
 
     if (!highlight || highlight.length < 3) {
@@ -76,11 +70,11 @@ export function marked(src, opt, callback) {
     if (!tokens.length) return done();
 
     let pending = 0;
-    marked.walkTokens(tokens, function(token) {
-      if (token.type === 'code') {
+    marked.walkTokens(tokens, function (token) {
+      if (token.type === "code") {
         pending++;
         setTimeout(() => {
-          highlight(token.text, token.lang, function(err, code) {
+          highlight(token.text, token.lang, function (err, code) {
             if (err) {
               return done(err);
             }
@@ -110,13 +104,15 @@ export function marked(src, opt, callback) {
     if (opt.walkTokens) {
       marked.walkTokens(tokens, opt.walkTokens);
     }
-    return Parser.parse(tokens, opt);
+    return await Parser.parse(tokens, opt);
   } catch (e) {
-    e.message += '\nPlease report this to https://github.com/markedjs/marked.';
+    e.message += "\nPlease report this to https://github.com/markedjs/marked.";
     if (opt.silent) {
-      return '<p>An error occurred:</p><pre>'
-        + escape(e.message + '', true)
-        + '</pre>';
+      return (
+        "<p>An error occurred:</p><pre>" +
+        escape(e.message + "", true) +
+        "</pre>"
+      );
     }
     throw e;
   }
@@ -126,8 +122,7 @@ export function marked(src, opt, callback) {
  * Options
  */
 
-marked.options =
-marked.setOptions = function(opt) {
+marked.options = marked.setOptions = function (opt) {
   merge(marked.defaults, opt);
   changeDefaults(marked.defaults);
   return marked;
@@ -141,9 +136,12 @@ marked.defaults = defaults;
  * Use Extension
  */
 
-marked.use = function(...args) {
+marked.use = function (...args) {
   const opts = merge({}, ...args);
-  const extensions = marked.defaults.extensions || { renderers: {}, childTokens: {} };
+  const extensions = marked.defaults.extensions || {
+    renderers: {},
+    childTokens: {},
+  };
   let hasExtensions;
 
   args.forEach((pack) => {
@@ -152,13 +150,16 @@ marked.use = function(...args) {
       hasExtensions = true;
       pack.extensions.forEach((ext) => {
         if (!ext.name) {
-          throw new Error('extension name required');
+          throw new Error("extension name required");
         }
-        if (ext.renderer) { // Renderer extensions
-          const prevRenderer = extensions.renderers ? extensions.renderers[ext.name] : null;
+        if (ext.renderer) {
+          // Renderer extensions
+          const prevRenderer = extensions.renderers
+            ? extensions.renderers[ext.name]
+            : null;
           if (prevRenderer) {
             // Replace extension with func to run new extension but fall back if false
-            extensions.renderers[ext.name] = function(...args) {
+            extensions.renderers[ext.name] = function (...args) {
               let ret = ext.renderer.apply(this, args);
               if (ret === false) {
                 ret = prevRenderer.apply(this, args);
@@ -169,8 +170,9 @@ marked.use = function(...args) {
             extensions.renderers[ext.name] = ext.renderer;
           }
         }
-        if (ext.tokenizer) { // Tokenizer Extensions
-          if (!ext.level || (ext.level !== 'block' && ext.level !== 'inline')) {
+        if (ext.tokenizer) {
+          // Tokenizer Extensions
+          if (!ext.level || (ext.level !== "block" && ext.level !== "inline")) {
             throw new Error("extension level must be 'block' or 'inline'");
           }
           if (extensions[ext.level]) {
@@ -178,14 +180,15 @@ marked.use = function(...args) {
           } else {
             extensions[ext.level] = [ext.tokenizer];
           }
-          if (ext.start) { // Function to check for start of token
-            if (ext.level === 'block') {
+          if (ext.start) {
+            // Function to check for start of token
+            if (ext.level === "block") {
               if (extensions.startBlock) {
                 extensions.startBlock.push(ext.start);
               } else {
                 extensions.startBlock = [ext.start];
               }
-            } else if (ext.level === 'inline') {
+            } else if (ext.level === "inline") {
               if (extensions.startInline) {
                 extensions.startInline.push(ext.start);
               } else {
@@ -194,7 +197,8 @@ marked.use = function(...args) {
             }
           }
         }
-        if (ext.childTokens) { // Child tokens to be visited by walkTokens
+        if (ext.childTokens) {
+          // Child tokens to be visited by walkTokens
           extensions.childTokens[ext.name] = ext.childTokens;
         }
       });
@@ -235,7 +239,7 @@ marked.use = function(...args) {
     // ==-- Parse WalkTokens extensions --== //
     if (pack.walkTokens) {
       const walkTokens = marked.defaults.walkTokens;
-      opts.walkTokens = function(token) {
+      opts.walkTokens = function (token) {
         pack.walkTokens.call(this, token);
         if (walkTokens) {
           walkTokens.call(this, token);
@@ -255,11 +259,11 @@ marked.use = function(...args) {
  * Run callback for every token
  */
 
-marked.walkTokens = function(tokens, callback) {
+marked.walkTokens = function (tokens, callback) {
   for (const token of tokens) {
     callback.call(marked, token);
     switch (token.type) {
-      case 'table': {
+      case "table": {
         for (const cell of token.header) {
           marked.walkTokens(cell.tokens, callback);
         }
@@ -270,13 +274,20 @@ marked.walkTokens = function(tokens, callback) {
         }
         break;
       }
-      case 'list': {
+      case "list": {
         marked.walkTokens(token.items, callback);
         break;
       }
       default: {
-        if (marked.defaults.extensions && marked.defaults.extensions.childTokens && marked.defaults.extensions.childTokens[token.type]) { // Walk any extensions
-          marked.defaults.extensions.childTokens[token.type].forEach(function(childTokens) {
+        if (
+          marked.defaults.extensions &&
+          marked.defaults.extensions.childTokens &&
+          marked.defaults.extensions.childTokens[token.type]
+        ) {
+          // Walk any extensions
+          marked.defaults.extensions.childTokens[token.type].forEach(function (
+            childTokens
+          ) {
             marked.walkTokens(token[childTokens], callback);
           });
         } else if (token.tokens) {
@@ -290,14 +301,19 @@ marked.walkTokens = function(tokens, callback) {
 /**
  * Parse Inline
  */
-marked.parseInline = function(src, opt) {
+marked.parseInline = function (src, opt) {
   // throw error in case of non string input
-  if (typeof src === 'undefined' || src === null) {
-    throw new Error('marked.parseInline(): input parameter is undefined or null');
+  if (typeof src === "undefined" || src === null) {
+    throw new Error(
+      "marked.parseInline(): input parameter is undefined or null"
+    );
   }
-  if (typeof src !== 'string') {
-    throw new Error('marked.parseInline(): input parameter is of type '
-      + Object.prototype.toString.call(src) + ', string expected');
+  if (typeof src !== "string") {
+    throw new Error(
+      "marked.parseInline(): input parameter is of type " +
+        Object.prototype.toString.call(src) +
+        ", string expected"
+    );
   }
 
   opt = merge({}, marked.defaults, opt || {});
@@ -310,11 +326,13 @@ marked.parseInline = function(src, opt) {
     }
     return Parser.parseInline(tokens, opt);
   } catch (e) {
-    e.message += '\nPlease report this to https://github.com/markedjs/marked.';
+    e.message += "\nPlease report this to https://github.com/markedjs/marked.";
     if (opt.silent) {
-      return '<p>An error occurred:</p><pre>'
-        + escape(e.message + '', true)
-        + '</pre>';
+      return (
+        "<p>An error occurred:</p><pre>" +
+        escape(e.message + "", true) +
+        "</pre>"
+      );
     }
     throw e;
   }
@@ -341,10 +359,10 @@ export const parseInline = marked.parseInline;
 export const parse = marked;
 export const parser = Parser.parse;
 export const lexer = Lexer.lex;
-export { defaults, getDefaults } from './defaults.js';
-export { Lexer } from './Lexer.js';
-export { Parser } from './Parser.js';
-export { Tokenizer } from './Tokenizer.js';
-export { Renderer } from './Renderer.js';
-export { TextRenderer } from './TextRenderer.js';
-export { Slugger } from './Slugger.js';
+export { defaults, getDefaults } from "./defaults.js";
+export { Lexer } from "./Lexer.js";
+export { Parser } from "./Parser.js";
+export { Tokenizer } from "./Tokenizer.js";
+export { Renderer } from "./Renderer.js";
+export { TextRenderer } from "./TextRenderer.js";
+export { Slugger } from "./Slugger.js";

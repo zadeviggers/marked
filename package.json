@@ -43,7 +43,7 @@
     "html"
   ],
   "devDependencies": {
-    "@babel/core": "^7.16.12",
+    "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.16.11",
     "@markedjs/html-differ": "^4.0.0",
     "@rollup/plugin-babel": "^5.3.0",
@@ -51,11 +51,11 @@
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.2",
-    "@semantic-release/npm": "^8.0.3",
+    "@semantic-release/npm": "^9.0.0",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "cheerio": "^1.0.0-rc.10",
     "commonmark": "0.30.0",
-    "eslint": "^8.7.0",
+    "eslint": "^8.9.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
@@ -65,11 +65,11 @@
     "jasmine": "^4.0.2",
     "markdown-it": "12.3.2",
     "node-fetch": "^3.2.0",
-    "rollup": "^2.66.0",
+    "rollup": "^2.67.3",
     "rollup-plugin-license": "^2.6.1",
     "semantic-release": "^19.0.2",
     "titleize": "^3.0.0",
-    "uglify-js": "^3.14.5",
+    "uglify-js": "^3.15.1",
     "vuln-regex-detector": "^1.3.0"
   },
   "scripts": {
